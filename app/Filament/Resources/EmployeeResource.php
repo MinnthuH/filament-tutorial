@@ -3,24 +3,59 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\EmployeeResource\Pages;
+use App\Models\City;
 use App\Models\Employee;
+use App\Models\State;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 
 class EmployeeResource extends Resource
 {
     protected static ?string $model = Employee::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $navigationGroup = 'Employee Management';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                Section::make('Location')
+                    ->description('Employee Location put in')
+                    ->schema([
+
+                        Forms\Components\Select::make('country_id')
+                            ->relationship(name: 'country', titleAttribute: 'name')
+                            ->searchable()
+                            ->live()
+                            ->required(),
+
+                        Forms\Components\Select::make('state_id')
+                            ->options(fn(Get $get): Collection => State::query()
+                                    ->where('country_id', $get('country_id'))
+                                    ->pluck('name', 'id'))
+                            ->live()
+                            ->searchable()
+                            ->required(),
+
+                        Forms\Components\Select::make('city_id')
+                            ->options(fn(Get $get): Collection => City::query()
+                                    ->where('state_id', $get('state_id'))
+                                    ->pluck('name', 'id'))
+                            ->searchable()
+                            ->required(),
+                        Forms\Components\Select::make('department_id')
+                            ->relationship(name: 'department', titleAttribute: 'name')
+                            ->searchable()
+                            ->required(),
+
+                    ])->columns(2),
 
                 Section::make('Employee Name')
                     ->description('Employee Name put in')
@@ -48,7 +83,7 @@ class EmployeeResource extends Resource
                         Forms\Components\TextInput::make('zip_code')
                             ->required()
                             ->maxLength(255),
-                    ])->columns(3),
+                    ])->columns(2),
                 Section::make('Employee Date')
                     ->description('Employee date put in')
                     ->schema([
@@ -57,7 +92,7 @@ class EmployeeResource extends Resource
                         Forms\Components\DatePicker::make('date_of_hire')
                             ->required(),
 
-                    ]),
+                    ])->columns(2),
 
             ])->columns(3);
     }
