@@ -7,9 +7,11 @@ use App\Models\City;
 use App\Models\Employee;
 use App\Models\State;
 use Filament\Forms;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -88,8 +90,12 @@ class EmployeeResource extends Resource
                     ->description('Employee date put in')
                     ->schema([
                         Forms\Components\DatePicker::make('date_of_bath')
+                            ->native(false)
+                            ->displayFormat('d/m/Y')
                             ->required(),
                         Forms\Components\DatePicker::make('date_of_hire')
+                            ->native(false)
+                            ->displayFormat('d/m/Y')
                             ->required(),
 
                     ])->columns(2),
@@ -101,30 +107,33 @@ class EmployeeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('country_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('country.name')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('state_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('state.name')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('city_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('city.name')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('department_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('department.name')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('first_name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('last_name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('middle_name')
-                    ->searchable(),
+                    ->searchable()
+
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('address')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('zip_code')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('date_of_bath')
                     ->date()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date_of_hire')
                     ->date()
@@ -149,6 +158,36 @@ class EmployeeResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make('Employee Location')
+                    ->schema([
+                        TextEntry::make('country.name'),
+                        TextEntry::make('state.name'),
+                        TextEntry::make('city.name'),
+                        TextEntry::make('department.name'),
+                    ])->columns(2),
+                Section::make('Employee Name')
+                    ->schema([
+                        TextEntry::make('first_name'),
+                        TextEntry::make('last_name'),
+                        TextEntry::make('middle_name'),
+                    ])->columns(3),
+                Section::make('Employee Address')
+                    ->schema([
+                        TextEntry::make('address'),
+                        TextEntry::make('zip_code'),
+                    ])->columns(2),
+                Section::make('Employee Date')
+                    ->schema([
+                        TextEntry::make('date_of_bath'),
+                        TextEntry::make('date_of_hire'),
+                    ])->columns(2),
             ]);
     }
 
